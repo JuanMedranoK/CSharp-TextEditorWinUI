@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CSharp-TextEditorWinUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "CSharp-TextEditorWinUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
