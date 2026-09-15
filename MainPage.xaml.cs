@@ -9,6 +9,7 @@ namespace CSharp_TextEditorWinUI
 {
     public sealed partial class MainPage : Page
     {
+        private string? currentFilePath = null;
         public MainPage()
         {
             InitializeComponent();
@@ -21,12 +22,6 @@ namespace CSharp_TextEditorWinUI
 
         private async void Abrir_Click(object sender, RoutedEventArgs e)
         {
-            //FileOpenPicker openPicker = new FileOpenPicker();
-
-            //new FileOpenPicker(windowId);
-
-            //openPicker.FileTypeFilter.Add(".txt");
-            //openPicker.FileTypeFilter.Add("*");
 
             App app = (App)Application.Current;
             Window? window = app.MainWindow;
@@ -35,8 +30,6 @@ namespace CSharp_TextEditorWinUI
 
             WindowId windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
 
-            //new FileOpenPicker(windowId);
-
             FileOpenPicker openPicker = new FileOpenPicker(windowId);
             openPicker.FileTypeFilter.Add(".txt");
             openPicker.FileTypeFilter.Add("*");
@@ -44,19 +37,48 @@ namespace CSharp_TextEditorWinUI
 
             if (result != null)
             {
+                currentFilePath = result.Path;
+
                 string content = await File.ReadAllTextAsync(result.Path);
                 EditorTextBox.Text = content;
             }
         }
-
-        private void Guardar_Click(object sender, RoutedEventArgs e)
+        private async void GuardarComo_Click(object sender, RoutedEventArgs e)
         {
+            App app = (App)Application.Current;
+            Window? window = app.MainWindow;
 
+            nint hwnd = WindowNative.GetWindowHandle(window);
+
+            WindowId windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
+
+            FileSavePicker savePicker = new FileSavePicker(windowId);
+
+            savePicker.FileTypeChoices.Add(
+            "Archivo de texto",
+            new List<string> { ".txt" }
+            );
+
+            savePicker.SuggestedFileName = "Documento";
+
+            var result = await savePicker.PickSaveFileAsync();
+
+            if (result != null)
+            {
+                await File.WriteAllTextAsync(
+                    result.Path,
+                    EditorTextBox.Text
+                );
+            }
         }
-
-        private void GuardarComo_Click(object sender, RoutedEventArgs e)
+        private async void Guardar_Click(object sender, RoutedEventArgs e)
         {
-
+            if (currentFilePath != null) 
+            { 
+               await File.WriteAllTextAsync(
+                   currentFilePath, 
+                   EditorTextBox.Text);
+            }
         }
 
         private void Salir_Click(object sender, RoutedEventArgs e)
